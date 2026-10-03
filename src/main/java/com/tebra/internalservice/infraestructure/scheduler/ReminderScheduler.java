@@ -1,5 +1,6 @@
 package com.tebra.internalservice.infraestructure.scheduler;
 
+import com.tebra.internalservice.infraestructure.discord.DiscordBotClient;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.service.ReminderService;
 import com.tebra.internalservice.utils.Constants;
@@ -25,10 +26,12 @@ public class ReminderScheduler {
     private final TaskScheduler taskScheduler;
     private final Map<Long, ScheduledFuture<?>> scheduleTasks = new ConcurrentHashMap<>();
     private final ReminderService reminderService;
+    private final DiscordBotClient discordBotClient;
 
-    public ReminderScheduler(TaskScheduler taskScheduler, ReminderService reminderService) {
+    public ReminderScheduler(TaskScheduler taskScheduler, ReminderService reminderService, DiscordBotClient discordBotClient) {
         this.taskScheduler = taskScheduler;
         this.reminderService = reminderService;
+        this.discordBotClient = discordBotClient;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -87,7 +90,7 @@ public class ReminderScheduler {
 
     private void execute(Long reminderId) {
         ReminderResponse reminder = reminderService.findById(reminderId);
-        //send message discord api
+        discordBotClient.sendMessage(reminder.getOwnerDiscordId(), reminder.getTitle(), reminder.getMessage());
         reminderService.updateNextExecutionOrFinish(reminderId);
         log.info("Scheduled executed Reminder: {}", reminder.getTitle());
     }
