@@ -4,6 +4,7 @@ import com.tebra.internalservice.modules.reminder.domain.RecurrenceType;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.entity.Reminder;
+import com.tebra.internalservice.modules.reminder.exception.ReminderDuplicateException;
 import com.tebra.internalservice.modules.reminder.exception.ReminderNotFoundException;
 import com.tebra.internalservice.modules.reminder.repository.ReminderRepository;
 import com.tebra.internalservice.utils.UtilsDate;
@@ -25,6 +26,23 @@ public class ReminderService {
     }
 
     public ReminderResponse create(ReminderCreateRequest request) {
+        Optional<Reminder> optional = reminderRepository.findByOwnerDiscordIdAndTitle(request.getOwnerDiscordId(), request.getTitle());
+
+        if (optional.isPresent()) {
+            Reminder reminder = optional.get();
+
+            if (reminder.isActive()) {
+                throw new ReminderDuplicateException(reminder.getTitle());
+            } else {
+                reminder.setActive(true);
+                reminder.setMessage(request.getMessage());
+                reminder.setNextExecution(UtilsDate.parseDate(request.getNextExecution(), "dd-MM-yyyy HH:mm"));
+                reminder.setRecurrence(request.getRecurrence());
+                reminderRepository.save(reminder);
+                return convertToResponse(reminder);
+            }
+        }
+
         Reminder reminder = new Reminder();
         reminder.setTitle(request.getTitle());
         reminder.setMessage(request.getMessage());

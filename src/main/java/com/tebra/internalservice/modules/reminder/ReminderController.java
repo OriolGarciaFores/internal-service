@@ -1,5 +1,6 @@
 package com.tebra.internalservice.modules.reminder;
 
+import com.tebra.internalservice.infraestructure.scheduler.ReminderScheduler;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.service.ReminderService;
@@ -13,13 +14,18 @@ public class ReminderController {
 
     private final ReminderService reminderService;
 
-    public ReminderController(ReminderService reminderService) {
+    private final ReminderScheduler reminderScheduler;
+
+    public ReminderController(ReminderService reminderService, ReminderScheduler reminderScheduler) {
         this.reminderService = reminderService;
+        this.reminderScheduler = reminderScheduler;
     }
 
     @PostMapping
     public ReminderResponse create(@RequestBody ReminderCreateRequest request) {
-        return reminderService.create(request);
+        ReminderResponse reminder = reminderService.create(request);
+        reminderScheduler.scheduleIfToday(reminder);
+        return reminder;
     }
 
     @GetMapping

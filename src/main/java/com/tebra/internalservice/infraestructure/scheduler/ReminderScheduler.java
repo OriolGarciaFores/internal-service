@@ -10,6 +10,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -72,5 +73,15 @@ public class ReminderScheduler {
         log.info("Reminder {} has been scheduled", reminder.getId());
         log.info("Reminder message: {}", reminder.getMessage());
         reminderService.updateNextExecutionOrFinish(reminderId);
+    }
+
+    public void scheduleIfToday(ReminderResponse reminder) {
+        if (reminder.getNextExecution().toLocalDate().equals(LocalDate.now())) {
+            schedule(reminder);
+        }
+
+        if (reminder.getNextExecution().toLocalDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de ejecución debe ser futura");
+        }
     }
 }
