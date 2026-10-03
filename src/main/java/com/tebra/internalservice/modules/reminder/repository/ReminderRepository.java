@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ReminderRepository extends JpaRepository<Reminder, Long> {
 
-    List<Reminder> findByActiveTrueAndNextExecutionLessThanEqual(LocalDateTime date);
+    List<Reminder> findByActiveTrueAndNextExecutionLessThan(LocalDateTime date);
 }

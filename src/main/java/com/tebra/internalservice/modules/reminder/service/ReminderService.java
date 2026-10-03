@@ -4,13 +4,16 @@ import com.tebra.internalservice.modules.reminder.domain.RecurrenceType;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.entity.Reminder;
+import com.tebra.internalservice.modules.reminder.exception.ReminderNotFoundException;
 import com.tebra.internalservice.modules.reminder.repository.ReminderRepository;
 import com.tebra.internalservice.utils.UtilsDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReminderService {
@@ -42,6 +45,31 @@ public class ReminderService {
                 .toList();
     }
 
+    public List<ReminderResponse> findAllPendingToday() {
+        LocalDateTime endDay = LocalDate.now().plusDays(1).atStartOfDay();
+
+        return reminderRepository.findByActiveTrueAndNextExecutionLessThan(endDay)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
+    public ReminderResponse findById(Long reminderId) {
+        Reminder reminder = reminderRepository.findById(reminderId).orElseThrow(() -> new ReminderNotFoundException(reminderId));
+        return convertToResponse(reminder);
+    }
+
+    @Transactional
+    public void updateNextExecutionOrFinish(Long reminderId) {
+        Reminder reminder = reminderRepository.findById(reminderId).orElseThrow(() -> new ReminderNotFoundException(reminderId));
+
+        if (reminder.getRecurrence().compareTo(RecurrenceType.NONE) == 0) {
+            reminder.setActive(false);
+        } else {
+            reminder.setNextExecution(calculateNextExecution(reminder));
+        }
+    }
+
     private ReminderResponse convertToResponse(Reminder reminder) {
         ReminderResponse reminderResponse = new ReminderResponse();
         reminderResponse.setId(reminder.getId());
@@ -52,20 +80,6 @@ public class ReminderService {
         reminderResponse.setOwnerDiscordId(reminder.getOwnerDiscordId());
         reminderResponse.setRecurrence(reminder.getRecurrence());
         return reminderResponse;
-    }
-
-    @Transactional
-    public void processPendingReminders() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Reminder> reminders = reminderRepository.findByActiveTrueAndNextExecutionLessThanEqual(now);
-
-        for (Reminder reminder : reminders) {
-            if (reminder.getRecurrence().compareTo(RecurrenceType.NONE) == 0) {
-                reminder.setActive(false);
-            } else {
-                reminder.setNextExecution(calculateNextExecution(reminder));
-            }
-        }
     }
 
     private LocalDateTime calculateNextExecution(Reminder reminder) {

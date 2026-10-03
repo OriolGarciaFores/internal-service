@@ -46,3 +46,9 @@ FASE 9
 Docker
 ↓
 Spring Boot + SQLite
+
+---
+
+TaskScheduler
+- Diario para planificar las tasksschedulers del dia
+- Lista taskschedulers de hoy
