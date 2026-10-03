@@ -78,7 +78,7 @@ public class ReminderService {
     }
 
     @Transactional
-    public void updateNextExecutionOrFinish(Long reminderId) {
+    public ReminderResponse updateNextExecutionOrFinish(Long reminderId) {
         Reminder reminder = reminderRepository.findById(reminderId).orElseThrow(() -> new ReminderNotFoundException(reminderId));
 
         if (reminder.getRecurrence().compareTo(RecurrenceType.NONE) == 0) {
@@ -86,6 +86,8 @@ public class ReminderService {
         } else {
             reminder.setNextExecution(calculateNextExecution(reminder));
         }
+
+        return convertToResponse(reminder);
     }
 
     private ReminderResponse convertToResponse(Reminder reminder) {

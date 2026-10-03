@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
@@ -32,18 +33,30 @@ public class ReminderScheduler {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
+        log.info("Initializing events");
         loadToday();
     }
 
     @Scheduled(cron = Constants.TIME_RELOAD_DAILY)
     private void loadReminders() {
+        log.info("Loading reminders daily");
         loadToday();
     }
 
     private void loadToday() {
         List<ReminderResponse> reminders = reminderService.findAllPendingToday();
+        LocalDateTime now = LocalDateTime.now();
 
         for (ReminderResponse reminder : reminders) {
+            if (reminder.getNextExecution().isBefore(now)) {
+                ReminderResponse reminderUpdated = reminderService.updateNextExecutionOrFinish(reminder.getId());
+                if (reminderUpdated.getNextExecution().isBefore(now)) {
+                    continue;
+                }
+
+                reminder = reminderUpdated;
+            }
+
             schedule(reminder);
         }
     }
@@ -57,22 +70,26 @@ public class ReminderScheduler {
         );
 
         scheduleTasks.put(reminderResponse.getId(), future);
+        log.info("Scheduled Reminder: {}", reminderResponse.getTitle());
     }
 
     private void cancel(Long reminderId) {
         ScheduledFuture<?> future = scheduleTasks.remove(reminderId);
 
-        if (future != null) {
-            future.cancel(false);
+        if (future == null) return;
+
+        if (future.cancel(false)) {
+           log.info("Cancelled Reminder: {}", reminderId);
+        } else  {
+            log.warn("Could not cancel Reminder: {}", reminderId);
         }
     }
 
     private void execute(Long reminderId) {
         ReminderResponse reminder = reminderService.findById(reminderId);
         //send message discord api
-        log.info("Reminder {} has been scheduled", reminder.getId());
-        log.info("Reminder message: {}", reminder.getMessage());
         reminderService.updateNextExecutionOrFinish(reminderId);
+        log.info("Scheduled executed Reminder: {}", reminder.getTitle());
     }
 
     public void scheduleIfToday(ReminderResponse reminder) {
