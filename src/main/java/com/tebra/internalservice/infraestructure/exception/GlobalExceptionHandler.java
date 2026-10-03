@@ -11,18 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("Unexpected error", e);
-
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Internal server error"
-                ));
-    }
-
     @ExceptionHandler(ReminderNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleReminderNotFound(ReminderNotFoundException e) {
         return ResponseEntity
