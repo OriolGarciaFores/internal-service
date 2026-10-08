@@ -1,0 +1,24 @@
+name: internal-service-local
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: internal-service-local
+    container_name: internal-service-local
+    restart: "no"
+    environment:
+      - DISCORD_BOT_URL=http://alts-bot-local:1234
+    volumes:
+      - internal-service-data-local:/app/data
+    networks:
+      - tebra-network
+
+volumes:
+  internal-service-data-local:
+    name: internal-service-data-local
+
+networks:
+  tebra-network:
+    external: true
