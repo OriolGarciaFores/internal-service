@@ -92,6 +92,7 @@ public class ReminderScheduler {
         ReminderResponse reminder = reminderService.findById(reminderId);
         discordBotClient.sendMessage(reminder.getOwnerDiscordId(), reminder.getTitle(), reminder.getMessage());
         reminderService.updateNextExecutionOrFinish(reminderId);
+        scheduleTasks.remove(reminderId);
         log.info("Scheduled executed Reminder: {}", reminder.getTitle());
     }
 
