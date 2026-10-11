@@ -127,12 +127,23 @@ public class ReminderService {
     }
 
     private LocalDateTime calculateNextExecution(Reminder reminder) {
-        return switch (reminder.getRecurrence()) {
-            case DAILY -> reminder.getNextExecution().plusDays(1);
-            case WEEKLY -> reminder.getNextExecution().plusWeeks(1);
-            case MONTHLY -> reminder.getNextExecution().plusMonths(1);
-            case NONE -> null;
-        };
+        if (reminder.getRecurrence() == RecurrenceType.NONE) {
+            return null;
+        }
+
+        LocalDateTime nextExecution = reminder.getNextExecution();
+        LocalDateTime now = LocalDateTime.now();
+
+        while (!nextExecution.isAfter(now)) {
+            nextExecution = switch (reminder.getRecurrence()) {
+                case DAILY -> nextExecution.plusDays(1);
+                case WEEKLY -> nextExecution.plusWeeks(1);
+                case MONTHLY -> nextExecution.plusMonths(1);
+                default -> nextExecution;
+            };
+        }
+
+        return nextExecution;
     }
 
     public void delete(Long reminderId) {
