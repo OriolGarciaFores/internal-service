@@ -4,6 +4,7 @@ import com.tebra.internalservice.infraestructure.scheduler.ReminderScheduler;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderFilterRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
+import com.tebra.internalservice.modules.reminder.dto.ReminderUpdateRequest;
 import com.tebra.internalservice.modules.reminder.service.ReminderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,19 @@ public class ReminderController {
         ReminderResponse reminder = reminderService.findById(id);
         reminderScheduler.cancelIfToday(reminder);
         reminderService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ReminderResponse getReminder(@PathVariable("id") Long id) {
+        return reminderService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateReminder(@PathVariable("id") Long id, @RequestBody ReminderUpdateRequest request) {
+        ReminderResponse reminderResponse = reminderService.update(id, request);
+        if(!reminderResponse.isActive()) reminderScheduler.cancelIfToday(reminderResponse);
+        if(reminderResponse.isActive()) reminderScheduler.scheduleIfToday(reminderResponse);
         return ResponseEntity.noContent().build();
     }
 }

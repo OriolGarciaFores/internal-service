@@ -3,6 +3,7 @@ package com.tebra.internalservice.modules.reminder.service;
 import com.tebra.internalservice.modules.reminder.domain.RecurrenceType;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
+import com.tebra.internalservice.modules.reminder.dto.ReminderUpdateRequest;
 import com.tebra.internalservice.modules.reminder.entity.Reminder;
 import com.tebra.internalservice.modules.reminder.exception.ReminderDuplicateException;
 import com.tebra.internalservice.modules.reminder.exception.ReminderNotFoundException;
@@ -95,6 +96,22 @@ public class ReminderService {
         }
 
         return convertToResponse(reminder);
+    }
+
+    public ReminderResponse update(Long id, ReminderUpdateRequest request) {
+        Reminder reminder = reminderRepository.findById(id).orElseThrow(() -> new ReminderNotFoundException(id));
+
+        reminder.setTitle(request.getTitle());
+        reminder.setMessage(request.getMessage());
+        reminder.setNextExecution(UtilsDate.parseDate(request.getNextExecution(), "dd-MM-yyyy HH:mm"));
+        reminder.setRecurrence(request.getRecurrence());
+        reminder.setActive(request.getActive());
+
+        if (reminder.getNextExecution().toLocalDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de ejecución debe ser futura");
+        }
+
+        return convertToResponse(reminderRepository.save(reminder));
     }
 
     private ReminderResponse convertToResponse(Reminder reminder) {
