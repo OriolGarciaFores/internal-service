@@ -1,0 +1,19 @@
+# Directorios de compilación de Maven
+target/
+.mvn/
+
+# Entornos y configuraciones locales
+.env
+.env.*
+.DS_Store
+.vscode
+.idea
+
+# Control de versiones
+.git
+.gitignore
+
+# Documentación y otros archivos innecesarios para producción
+README.md
+Dockerfile
+docker-compose.yml
