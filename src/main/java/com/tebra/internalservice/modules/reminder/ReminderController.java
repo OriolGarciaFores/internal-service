@@ -5,6 +5,7 @@ import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderFilterRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.service.ReminderService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,5 +33,13 @@ public class ReminderController {
     @GetMapping
     public List<ReminderResponse> getReminders(ReminderFilterRequest request) {
         return reminderService.findWithFilters(request.title(), request.active());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReminders(@PathVariable("id") Long id) {
+        ReminderResponse reminder = reminderService.findById(id);
+        reminderScheduler.cancelIfToday(reminder);
+        reminderService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

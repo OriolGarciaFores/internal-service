@@ -117,4 +117,8 @@ public class ReminderService {
             case NONE -> null;
         };
     }
+
+    public void delete(Long reminderId) {
+        reminderRepository.deleteById(reminderId);
+    }
 }

@@ -104,4 +104,10 @@ public class ReminderScheduler {
             throw new IllegalArgumentException("La fecha de ejecución debe ser futura");
         }
     }
+
+    public void cancelIfToday(ReminderResponse reminder) {
+        if (reminder.getNextExecution().toLocalDate().equals(LocalDate.now())) {
+            cancel(reminder.getId());
+        }
+    }
 }
