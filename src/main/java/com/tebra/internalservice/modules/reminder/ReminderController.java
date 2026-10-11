@@ -2,6 +2,7 @@ package com.tebra.internalservice.modules.reminder;
 
 import com.tebra.internalservice.infraestructure.scheduler.ReminderScheduler;
 import com.tebra.internalservice.modules.reminder.dto.ReminderCreateRequest;
+import com.tebra.internalservice.modules.reminder.dto.ReminderFilterRequest;
 import com.tebra.internalservice.modules.reminder.dto.ReminderResponse;
 import com.tebra.internalservice.modules.reminder.service.ReminderService;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class ReminderController {
     }
 
     @GetMapping
-    public List<ReminderResponse> findAll() {
-        return reminderService.findAll();
+    public List<ReminderResponse> getReminders(ReminderFilterRequest request) {
+        return reminderService.findWithFilters(request.title(), request.active());
     }
 }

@@ -63,6 +63,13 @@ public class ReminderService {
                 .toList();
     }
 
+    public List<ReminderResponse> findWithFilters(String title, Boolean active) {
+        return reminderRepository.findWithFilters(title, active)
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+
     public List<ReminderResponse> findAllPendingToday() {
         LocalDateTime endDay = LocalDate.now().plusDays(1).atStartOfDay();
 
