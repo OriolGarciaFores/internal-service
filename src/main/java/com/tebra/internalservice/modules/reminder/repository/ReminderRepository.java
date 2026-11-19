@@ -2,6 +2,7 @@ package com.tebra.internalservice.modules.reminder.repository;
 
 import com.tebra.internalservice.modules.reminder.entity.Reminder;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
@@ -18,4 +19,10 @@ public interface ReminderRepository extends JpaRepository<Reminder, Long> {
             "(:title IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND" +
             "(:active IS NULL OR r.active = :active)")
     List<Reminder> findWithFilters(String title, Boolean active);
+
+    @Modifying
+    @Query("DELETE FROM Reminder r " +
+            "WHERE r.active = false " +
+            "AND r.lastUpdate < :date")
+    void deleteAllInactive(LocalDateTime date);
 }

@@ -37,13 +37,20 @@ public class ReminderScheduler {
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
         log.info("Initializing events");
+        deleteInactiveReminders();
         loadToday();
     }
 
     @Scheduled(cron = Constants.TIME_RELOAD_DAILY)
     private void loadReminders() {
         log.info("Loading reminders daily");
+        deleteInactiveReminders();
         loadToday();
+    }
+
+    private void deleteInactiveReminders() {
+        log.info("Deleting reminders inactive before 20 days");
+        reminderService.deleteAllInactive();
     }
 
     private void loadToday() {

@@ -149,4 +149,10 @@ public class ReminderService {
     public void delete(Long reminderId) {
         reminderRepository.deleteById(reminderId);
     }
+
+
+    @Transactional
+    public void deleteAllInactive() {
+        reminderRepository.deleteAllInactive(LocalDateTime.now().minusDays(20));
+    }
 }
