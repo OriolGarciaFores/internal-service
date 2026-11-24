@@ -2,6 +2,7 @@ package com.tebra.internalservice.infraestructure.exception;
 
 import com.tebra.internalservice.modules.reminder.exception.ReminderDuplicateException;
 import com.tebra.internalservice.modules.reminder.exception.ReminderNotFoundException;
+import com.tebra.internalservice.modules.storage.exception.FileNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,16 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(
                         HttpStatus.CONFLICT.value(),
+                        e.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(FileNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleFileNotFound(FileNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        HttpStatus.NOT_FOUND.value(),
                         e.getMessage()
                 ));
     }

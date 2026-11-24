@@ -12,12 +12,15 @@ services:
       - DISCORD_BOT_URL=http://alts-bot-local:1234
     volumes:
       - internal-service-data-local:/app/data
+      - internal-service-files-local:/app/files
     networks:
       - tebra-network
 
 volumes:
   internal-service-data-local:
     name: internal-service-data-local
+  internal-service-files-local:
+    name: internal-service-files-local
 
 networks:
   tebra-network:
