@@ -12,7 +12,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     Optional<File> findByTitleAndType(String title, String type);
 
-    Optional<List<File>> findAllByLastUpdateLessThan(LocalDateTime lastUpdated);
+    List<File> findAllByLastUpdateLessThan(LocalDateTime lastUpdated);
 
     @Query("SELECT f FROM File f WHERE " +
             "(:title IS NULL OR LOWER(f.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND" +

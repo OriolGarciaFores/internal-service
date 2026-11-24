@@ -56,8 +56,11 @@ public class FileService {
                 .toList();
     }
 
-    public Optional<List<File>> findExpiredCandidates() {
-        return fileRepository.findAllByLastUpdateLessThan(LocalDateTime.now().minusDays(20));
+    public List<FileResponse> findExpiredCandidates() {
+        return fileRepository.findAllByLastUpdateLessThan(LocalDateTime.now().minusDays(20))
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
     public FileResponse findById(Long id) {
